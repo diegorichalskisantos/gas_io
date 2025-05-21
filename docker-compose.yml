@@ -6,13 +6,12 @@ services:
     restart: always
     env_file: .env
     ports:
-      - "3307:3306"
+      - "3307:3306"  # Porta externa:interna
     volumes:
       - db_data:/var/lib/mysql
 
   backend:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
     ports:
@@ -21,6 +20,9 @@ services:
       - db
     env_file:
       - .env
+    command: ["/wait-for-it.sh", "db:3306", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+    working_dir: /app
+    entrypoint: ["/wait-for-it.sh", "db:3306", "--"]
 
 volumes:
   db_data:
